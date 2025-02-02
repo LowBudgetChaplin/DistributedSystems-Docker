@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  activemq:
+    image: rmohr/activemq
+    container_name: activemq
+    restart: always
+    networks:
+      - app_network
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+  
+  container_c01:
+    build: ./C01
+    container_name: container_c01
+    restart: always
+    networks:
+      - app_network
+    depends_on:
+      activemq:
+        condition: service_started
+    ports:
+      - "8080:8080"
+  
+  c03_zoom_listener:
+    build: ./C03/C03
+    container_name: c03_zoom_listener
+    restart: always
+    depends_on:
+      activemq:
+        condition: service_started
+    environment:
+      - ACTIVEMQ_BROKER_URL=tcp://activemq:61616
+    networks:
+      - app_network
+  
+  c04_zoom_in_server:
+    build: ./C04/C04
+    container_name: c04_zoom_in_server
+    restart: always
+    networks:
+      - app_network
+    depends_on:
+      activemq:
+        condition: service_started
+  
+  c05_zoom_out_server:
+    build: ./C05/C05
+    container_name: c05_zoom_out_server
+    restart: always
+    networks:
+      - app_network
+    depends_on:
+      activemq:
+        condition: service_started
+  
+  c06_rest_api:
+    build: ./C06
+    container_name: c06_rest_api
+    restart: always
+    networks:
+      - app_network
+    ports:
+      - "3101:3101"
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=your_mysql_user
+      - MYSQL_PASSWORD=your_mysql_password
+      - MYSQL_DATABASE=your_mysql_db
+      - MONGO_URI=mongodb://mongo:27017
+      - MONGO_DB=snmpdb
+  
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: myrootpass
+      MYSQL_DATABASE: bmp_db
+      MYSQL_USER: bmp_user
+      MYSQL_PASSWORD: bmp_pass
+    ports:
+      - "3307:3306"
+    networks:
+      - app_network
+  
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
