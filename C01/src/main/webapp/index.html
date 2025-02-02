@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMP Image Uploader</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555555;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input[type="file"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid;
+            border-radius: 5px;
+            display: none;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .response.success {
+            border-color: #4CAF50;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .response.error {
+            border-color: #f44336;
+            background-color: #ffebee;
+            color: #b71c1c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>BMP Image Uploader</h2>
+        <form id="uploadForm" action="/C01/upload" method="POST" enctype="multipart/form-data">
+            <label for="bmpFile">Select BMP Image:</label>
+            <input type="file" id="bmpFile" name="bmpFile" accept=".bmp" required>
+
+            <label for="zoomType">Zoom Type:</label>
+            <select id="zoomType" name="zoomType" required>
+                <option value="" disabled selected>Select Zoom Option</option>
+                <option value="in">Zoom In</option>
+                <option value="out">Zoom Out</option>
+            </select>
+
+            <label for="zoomPercent">Zoom Percentage (%):</label>
+            <input type="number" id="zoomPercent" name="zoomPercent" min="1" max="500" value="100" required>
+
+            <button type="submit">Upload and Process</button>
+        </form>
+
+        <div class="response" id="response"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const responseDiv = document.getElementById('response');
+            responseDiv.style.display = 'none';
+            responseDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('/C01/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.text();
+
+                if (response.ok) {
+                    responseDiv.style.display = 'block';
+                    responseDiv.classList.add('success');
+                    responseDiv.classList.remove('error');
+                    responseDiv.innerHTML = `<strong>Success:</strong> ${result}`;
+                } else {
+                    throw new Error(result);
+                }
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.classList.add('error');
+                responseDiv.classList.remove('success');
+                responseDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
