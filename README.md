@@ -1,0 +1,5 @@
+- npm install for C06
+- MySql for db
+- Java 17.0.12
+- Dockerfile: - docker-compose build --no-cache
+              - docker-compose up -d
