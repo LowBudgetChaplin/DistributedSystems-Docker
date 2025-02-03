@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Processed Image and SNMP Data Viewer</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    #snmp-data { white-space: pre; background: #f4f4f4; padding: 10px; }
+    img { max-width: 100%; border: 1px solid #ccc; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Processed Image and SNMP Data</h1>
+  <h2>SNMP Data</h2>
+  <div id="snmp-data">Loading SNMP data...</div>
+  
+  <h2>Processed BMP Image</h2>
+  <div>
+    <img id="processed-image" src="/picture" alt="Processed BMP Image">
+  </div>
+  
+  <script>
+    async function fetchSNMPData() {
+      try {
+        const response = await fetch('/snmp');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        document.getElementById('snmp-data').textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById('snmp-data').textContent = 'Error fetching SNMP data: ' + error;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchSNMPData();
+    });
+  </script>
+</body>
+</html>
